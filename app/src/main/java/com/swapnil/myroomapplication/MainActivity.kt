@@ -47,5 +47,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun onItemClick(subscriber: Subscriber){
         Toast.makeText(this, "name ${subscriber.name}", Toast.LENGTH_LONG).show()
+
+        viewModel.initUpdateDelete(subscriber)
     }
 }

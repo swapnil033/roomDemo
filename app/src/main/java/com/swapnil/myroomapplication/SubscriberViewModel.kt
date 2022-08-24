@@ -9,6 +9,9 @@ import kotlinx.coroutines.launch
 
 class SubscriberViewModel(private val repository: SubscriberRepository) : ViewModel() {
 
+    private var isUpdateOrDelete = false
+    private lateinit var subscriberIsUpdateOrDelete : Subscriber
+
     val subscribers = repository.subscribers
 
     val name = MutableLiveData<String?>()
@@ -26,29 +29,61 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     }
 
     fun saveOrUpdate(){
-        insert(Subscriber(0, name.value!!, email.value!!))
+        if(isUpdateOrDelete){
+            subscriberIsUpdateOrDelete.name = name.value!!
+            subscriberIsUpdateOrDelete.email = email.value!!
+            update(subscriberIsUpdateOrDelete)
+        }else{
+            insert(Subscriber(0, name.value!!, email.value!!))
+        }
+
+        saveOrUpdateButtonTxt.value = "Save"
+        clearOrDeleteButtonTxt.value = "Clear All"
+        isUpdateOrDelete = false
         name.value = null
         email.value = null
     }
 
     fun clearOrDelete(){
-        deleteAll()
+
+        if(isUpdateOrDelete){
+            delete(subscriberIsUpdateOrDelete)
+        }else{
+            deleteAll()
+        }
+
+        saveOrUpdateButtonTxt.value = "Save"
+        clearOrDeleteButtonTxt.value = "Clear All"
+        isUpdateOrDelete = false
+        name.value = null
+        email.value = null
     }
 
-    fun insert(subscriber: Subscriber) = viewModelScope.launch {
+    fun initUpdateDelete(subscriber: Subscriber){
+        name.value = subscriber.name
+        email.value = subscriber.email
+
+        isUpdateOrDelete = true
+        subscriberIsUpdateOrDelete = subscriber
+        saveOrUpdateButtonTxt.value = "Update"
+
+        clearOrDeleteButtonTxt.value = "Delete"
+    }
+
+    private fun insert(subscriber: Subscriber) = viewModelScope.launch {
         repository.insert(subscriber)
     }
 
 
-    fun update(subscriber: Subscriber) = viewModelScope.launch {
+    private fun update(subscriber: Subscriber) = viewModelScope.launch {
         repository.update(subscriber)
     }
 
-    fun delete(subscriber: Subscriber) = viewModelScope.launch {
+    private fun delete(subscriber: Subscriber) = viewModelScope.launch {
         repository.delete(subscriber)
     }
 
-    fun deleteAll() = viewModelScope.launch {
+    private fun deleteAll() = viewModelScope.launch {
         repository.deleteAll()
     }
 
