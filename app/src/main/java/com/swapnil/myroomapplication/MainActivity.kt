@@ -43,10 +43,16 @@ class MainActivity : AppCompatActivity() {
                 onItemClick(selectedItem)
             }
         })
+
+        viewModel.message.observe(this, Observer{
+            it.getContentIfNotHandled().let {
+                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+            }
+        })
     }
 
     private fun onItemClick(subscriber: Subscriber){
-        Toast.makeText(this, "name ${subscriber.name}", Toast.LENGTH_LONG).show()
+        //Toast.makeText(this, "name ${subscriber.name}", Toast.LENGTH_LONG).show()
 
         viewModel.initUpdateDelete(subscriber)
     }

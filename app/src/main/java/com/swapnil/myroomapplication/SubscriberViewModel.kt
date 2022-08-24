@@ -1,5 +1,6 @@
 package com.swapnil.myroomapplication
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,11 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     val saveOrUpdateButtonTxt = MutableLiveData<String>()
 
     val clearOrDeleteButtonTxt = MutableLiveData<String>()
+
+    private val _message = MutableLiveData<Event<String>>()
+
+    val message : LiveData<Event<String>>
+    get() = _message
 
     init {
         saveOrUpdateButtonTxt.value = "Save"
@@ -72,19 +78,23 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
 
     private fun insert(subscriber: Subscriber) = viewModelScope.launch {
         repository.insert(subscriber)
+        _message.value = Event("Subscriber added successfully!");
     }
 
 
     private fun update(subscriber: Subscriber) = viewModelScope.launch {
         repository.update(subscriber)
+        _message.value = Event("Subscriber updated successfully!");
     }
 
     private fun delete(subscriber: Subscriber) = viewModelScope.launch {
         repository.delete(subscriber)
+        _message.value = Event("Subscriber deleted successfully!");
     }
 
     private fun deleteAll() = viewModelScope.launch {
         repository.deleteAll()
+        _message.value = Event("all Subscribers deleted successfully!");
     }
 
 }
