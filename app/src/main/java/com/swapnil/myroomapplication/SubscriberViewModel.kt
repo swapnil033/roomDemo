@@ -1,5 +1,6 @@
 package com.swapnil.myroomapplication
 
+import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.swapnil.myroomapplication.db.Subscriber
 import com.swapnil.myroomapplication.db.SubscriberRepository
 import kotlinx.coroutines.launch
+import java.util.regex.Pattern
 
 class SubscriberViewModel(private val repository: SubscriberRepository) : ViewModel() {
 
@@ -35,19 +37,28 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     }
 
     fun saveOrUpdate(){
-        if(isUpdateOrDelete){
-            subscriberIsUpdateOrDelete.name = name.value!!
-            subscriberIsUpdateOrDelete.email = email.value!!
-            update(subscriberIsUpdateOrDelete)
-        }else{
-            insert(Subscriber(0, name.value!!, email.value!!))
-        }
 
-        saveOrUpdateButtonTxt.value = "Save"
-        clearOrDeleteButtonTxt.value = "Clear All"
-        isUpdateOrDelete = false
-        name.value = null
-        email.value = null
+        if(name.value == null){
+            _message.value = Event("Please enter subscriber's name.");
+        }else if(email.value == null){
+            _message.value = Event("Please enter subscriber's email.");
+        }else if(!Patterns.EMAIL_ADDRESS.matcher(email.value!!).matches()){
+            _message.value = Event("Please enter correct email address.");
+        }else{
+            if(isUpdateOrDelete){
+                subscriberIsUpdateOrDelete.name = name.value!!
+                subscriberIsUpdateOrDelete.email = email.value!!
+                update(subscriberIsUpdateOrDelete)
+            }else{
+                insert(Subscriber(0, name.value!!, email.value!!))
+            }
+
+            saveOrUpdateButtonTxt.value = "Save"
+            clearOrDeleteButtonTxt.value = "Clear All"
+            isUpdateOrDelete = false
+            name.value = null
+            email.value = null
+        }
     }
 
     fun clearOrDelete(){
@@ -77,24 +88,37 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     }
 
     private fun insert(subscriber: Subscriber) = viewModelScope.launch {
-        repository.insert(subscriber)
-        _message.value = Event("Subscriber added successfully!");
+        val newAddedRow = repository.insert(subscriber)
+
+        if(newAddedRow > -1)
+            _message.value = Event("Subscriber added successfully!");
+        else
+            _message.value = Event("error occurred!");
     }
 
 
     private fun update(subscriber: Subscriber) = viewModelScope.launch {
-        repository.update(subscriber)
-        _message.value = Event("Subscriber updated successfully!");
+        val updatedRow = repository.update(subscriber)
+        if(updatedRow > -1)
+            _message.value = Event("Subscriber updated successfully!");
+        else
+            _message.value = Event("error occurred!");
     }
 
     private fun delete(subscriber: Subscriber) = viewModelScope.launch {
-        repository.delete(subscriber)
-        _message.value = Event("Subscriber deleted successfully!");
+        val noOfDeletedRow = repository.delete(subscriber)
+        if(noOfDeletedRow > 0)
+            _message.value = Event("Subscriber deleted successfully!");
+        else
+            _message.value = Event("error occurred!");
     }
 
     private fun deleteAll() = viewModelScope.launch {
-        repository.deleteAll()
-        _message.value = Event("all Subscribers deleted successfully!");
+        val noOfDeletedRow = repository.deleteAll()
+        if(noOfDeletedRow > 0)
+            _message.value = Event("all Subscribers deleted successfully!");
+        else
+            _message.value = Event("error occurred!");
     }
 
 }
