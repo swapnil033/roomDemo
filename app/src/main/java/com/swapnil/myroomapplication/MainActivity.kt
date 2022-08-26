@@ -49,15 +49,15 @@ class MainActivity : AppCompatActivity() {
             adapter.updateList(it)
         })
 
-        /*viewModel.message.observe(this, Observer{
-            it.getContentIfNotHandled().let {
+        viewModel.message.observe(this, Observer{ it ->
+            it.getContentIfNotHandled()?.let {
                 Toast.makeText(this, it, Toast.LENGTH_LONG).show()
             }
-        })*/
-
-        viewModel.messageS.observe(this, Observer{
-            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         })
+
+        /*viewModel.messageS.observe(this, Observer{
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        })*/
     }
 
     private fun onItemClick(subscriber: Subscriber){
