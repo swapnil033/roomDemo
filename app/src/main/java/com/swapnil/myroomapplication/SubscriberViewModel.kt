@@ -30,6 +30,11 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
     val message : LiveData<Event<String>>
     get() = _message
 
+    private val _messageS = MutableLiveData<String>()
+
+    val messageS : LiveData<String>
+    get() = _messageS
+
     init {
         saveOrUpdateButtonTxt.value = "Save"
 
@@ -40,10 +45,13 @@ class SubscriberViewModel(private val repository: SubscriberRepository) : ViewMo
 
         if(name.value == null){
             _message.value = Event("Please enter subscriber's name.");
+            _messageS.value = "Please enter subscriber's name.";
         }else if(email.value == null){
             _message.value = Event("Please enter subscriber's email.");
+            _messageS.value = "Please enter subscriber's email.";
         }else if(!Patterns.EMAIL_ADDRESS.matcher(email.value!!).matches()){
             _message.value = Event("Please enter correct email address.");
+            _messageS.value = "Please enter correct email address.";
         }else{
             if(isUpdateOrDelete){
                 subscriberIsUpdateOrDelete.name = name.value!!
